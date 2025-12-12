@@ -11,15 +11,29 @@ document.addEventListener("DOMContentLoaded", function () {
     chatBox.scrollTop = chatBox.scrollHeight;
   }
 
+  function showTypingIndicator() {
+    const typing = document.createElement("div");
+    typing.classList.add("typing-indicator");
+    typing.textContent = "⏳ MindConnect is typing...";
+    typing.setAttribute("id", "typing");
+    chatBox.appendChild(typing);
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
+
+  function removeTypingIndicator() {
+    const typing = document.getElementById("typing");
+    if (typing) typing.remove();
+  }
+
   sendButton.addEventListener("click", () => {
     const message = userInput.value.trim();
     if (!message) return;
 
-    // Shows the user message
     addMessage("user", message);
     userInput.value = "";
 
-    // Send to the Flask backend
+    showTypingIndicator();
+
     fetch("/chat", {
       method: "POST",
       headers: {
@@ -29,10 +43,11 @@ document.addEventListener("DOMContentLoaded", function () {
     })
       .then(response => response.json())
       .then(data => {
+        removeTypingIndicator();
         addMessage("bot", data.reply);
       })
       .catch(error => {
-        console.error("Error:", error);
+        removeTypingIndicator();
         addMessage("bot", "Sorry, something went wrong. Please try again.");
       });
   });
